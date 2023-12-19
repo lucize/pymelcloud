@@ -94,7 +94,8 @@ class Device(ABC):
             and c.get("BuildingID") == self.building_id
         )
         self._state = await self._client.fetch_device_state(self)
-        self._energy_report = await self._client.fetch_energy_report(self)
+        if(self.device_type != 3): 
+            self._energy_report = await self._client.fetch_energy_report(self)
 
         if self._device_units is None and self.access_level != ACCESS_LEVEL.get(
             "GUEST"
