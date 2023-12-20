@@ -12,6 +12,7 @@ from pymelcloud.const import (
     UNIT_TEMP_CELSIUS,
     UNIT_TEMP_FAHRENHEIT,
     ACCESS_LEVEL,
+    DEVICE_TYPE_ERV
 )
 
 PROPERTY_POWER = "power"
@@ -94,7 +95,7 @@ class Device(ABC):
             and c.get("BuildingID") == self.building_id
         )
         self._state = await self._client.fetch_device_state(self)
-        if(self.device_type != 3): 
+        if(self.device_type != DEVICE_TYPE_ERV): 
             self._energy_report = await self._client.fetch_energy_report(self)
 
         if self._device_units is None and self.access_level != ACCESS_LEVEL.get(
