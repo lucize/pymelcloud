@@ -168,13 +168,6 @@ class ErvDevice(Device):
         if self._device_conf is None:
             return False
         return self._device().get("CoreMaintenanceRequired", False)
-    
-    @property
-    def power(self) -> bool:
-        """Return True if device is on."""
-        if self._device_conf is None:
-            return False
-        return self._device().get("Power", False)
 
     @property
     def filter_maintenance_required(self) -> bool:
