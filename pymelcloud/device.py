@@ -52,17 +52,6 @@ class Device(ABC):
         self._write_task: Optional[asyncio.Future[None]] = None
         self._pending_writes: Dict[str, Any] = {}
 
-    def get_device_prop(self, name: str) -> Optional[Any]:
-        """Access device properties while shortcutting the nested device access."""
-        device = self._device_conf.get("Device", {})
-        return device.get(name)
-
-    def get_state_prop(self, name: str) -> Optional[Any]:
-        """Access state prop without None check."""
-        if self._state is None:
-            return None
-        return self._state.get(name)
-
     def round_temperature(self, temperature: float) -> float:
         """Round a temperature to the nearest temperature increment."""
         return float(
@@ -189,7 +178,7 @@ class Device(ABC):
             return None
         return datetime.strptime(
             self._state.get("LastCommunication"), "%Y-%m-%dT%H:%M:%S.%f"
-        ).replace(tzinfo=timezone.utc)
+        )
 
     @property
     def power(self) -> Optional[bool]:
@@ -200,55 +189,8 @@ class Device(ABC):
 
     @property
     def daily_energy_consumed(self) -> Optional[float]:
-        """Return daily energy consumption for the current day in kWh.
+        """Return None.
 
-        The value resets at midnight MELCloud time. The logic here is a bit iffy and
-        fragmented between Device and Client. Here's how it goes:
-          - Client requests a 5 day report. Today, 2 days from the past and 2 days from
-            the past.
-          - MELCloud, with its clock potentially set to a different timezone than the
-            client, returns a report containing data from a couple of days from the
-            past and from the current day in MELCloud time.
-          - Device sums up the date from the last day bucket in the report.
-
-        TLDR: Request some days from the past and some days from the future -> receive
-        the latest day bucket.
+        This operation seems to be off limits.
         """
-        if self._energy_report is None:
-            return None
-
-        consumption = 0
-
-        for mode in ['Heating', 'Cooling', 'Auto', 'Dry', 'Fan', 'Other']:
-            previous_reports = self._energy_report.get(mode, [0.0])
-            if previous_reports:
-                last_report = previous_reports[-1]
-            else:
-                last_report = 0.0
-            consumption += last_report
-
-        return consumption
-
-    @property
-    def wifi_signal(self) -> Optional[int]:
-        """Return wifi signal in dBm (negative value)."""
-        if self._device_conf is None:
-            return None
-        return self._device_conf.get("Device", {}).get("WifiSignalStrength", None)
-
-    @property
-    def has_error(self) -> bool:
-        """Return True if the device has error state."""
-        if self._state is None:
-            return False
-        return self._state.get("HasError", False)
-
-    @property
-    def error_code(self) -> Optional[str]:
-        """Return error_code.
-        This is a property that probably should be checked if "has_error" = true
-        Till now I have a fixed code = 8000 and never have error on the units
-        """
-        if self._state is None:
-            return None
-        return self._state.get("ErrorCode", None)
+        return None
